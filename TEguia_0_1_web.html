@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#168f93">
+<title>TEguíA 0.1</title>
+<style>
+:root{--teal:#168f93;--teal2:#0f777b;--ink:#17212b;--muted:#66727d;--line:#e5e9ec;--soft:#f5f7f8;--green:#4f9b65}
+*{box-sizing:border-box}body{margin:0;background:#eef1f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+.app{max-width:430px;min-height:100vh;margin:auto;background:#fff;display:flex;flex-direction:column}
+main{padding:20px 20px 30px;flex:1;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}.back{border:0;background:none;font-size:22px;color:var(--ink);padding:4px}.progress{height:5px;background:#e8ecee;border-radius:10px;flex:1;overflow:hidden}.progress span{display:block;height:100%;background:var(--teal);border-radius:10px;transition:.25s}.count{font-size:12px;color:var(--muted);white-space:nowrap}
+.center{text-align:center}.logoicon{font-size:58px;margin-top:25px}.logo{font-size:43px;font-weight:800;letter-spacing:-2px;color:var(--teal);margin:6px 0}.logo b{color:var(--ink)}h1{font-size:28px;line-height:1.12;margin:12px 0}h2{font-size:25px;line-height:1.2;text-align:center;margin:8px 0 10px}p{line-height:1.45;color:var(--muted);margin:8px 0}.hero{margin:22px 0 10px;font-size:74px}
+.spacer{flex:1;min-height:18px}.btn{width:100%;border:0;border-radius:14px;padding:15px 16px;font-size:16px;font-weight:700;margin-top:10px;cursor:pointer}.primary{background:var(--teal);color:#fff}.secondary{background:var(--soft);color:var(--ink)}.link{background:none;color:var(--teal);font-weight:650;border:0;margin-top:10px;padding:10px;cursor:pointer}
+.card{border:1px solid var(--line);border-radius:15px;padding:15px;margin:10px 0;display:flex;gap:12px;align-items:center;cursor:pointer;background:#fff;text-align:left}.card.selected{border-color:#73b879;background:#f2faf3}.card .emoji{font-size:23px}.card .check{margin-left:auto;color:var(--green);font-size:20px}.card strong{display:block;font-size:15px}.hint{background:var(--soft);padding:14px;border-radius:14px;font-size:13px;margin-top:14px}
+.checkrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:13px;margin:8px 0;cursor:pointer}.checkrow.sel{background:#eef9f9;border-color:#77bfc1}.box{width:20px;height:20px;border:1.5px solid #aab3b8;border-radius:5px;display:grid;place-items:center;flex:none}.sel .box{background:var(--teal);border-color:var(--teal);color:#fff}.scroll{overflow:auto;max-height:55vh}
+.location{background:linear-gradient(145deg,#f2fbfb,#fff);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;margin-top:16px}.pin{font-size:40px}
+.loading{text-align:center}.compass{font-size:90px;margin:50px 0 15px}.spin{display:inline-block;animation:spin 1.4s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.rec{border-radius:16px;padding:16px;margin:10px 0;border:1px solid var(--line);cursor:pointer}.rec:nth-of-type(1){background:#fff5f5}.rec:nth-of-type(2){background:#fff9f0}.rec:nth-of-type(3){background:#fffdf0}.rec:nth-of-type(4){background:#f2fbf2}.rec h3{margin:0 0 6px;font-size:16px}.rec p{font-size:13px;margin:0}.nav{position:sticky;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:11px 8px calc(11px + env(safe-area-inset-bottom));font-size:11px;color:var(--muted)}.nav b{color:var(--teal)}.detail .icon{font-size:38px}.detail h1{text-align:left}.detail .info{background:var(--soft);padding:15px;border-radius:14px;margin-top:18px}.notice{font-size:12px;color:var(--muted);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const S={step:0,stage:"",age:"",location:"",diagnosis:"",needs:[],interventions:[],school:"",notifications:false};
+const teal="#168f93";
+const app=document.getElementById("app");
+function header(){if(S.step===0||S.step>=10)return "";return `<div class="top"><button class="back" onclick="back()">‹</button><div class="progress"><span style="width:${Math.min(100,S.step/8*100)}%"></span></div><div class="count">${Math.min(S.step,8)} de 8</div></div>`}
+function shell(body){app.innerHTML=`<main>${header()}${body}</main>`}
+function btn(t,fn="next()"){return `<button class="btn primary" onclick="${fn}">${t}</button>`}
+function option(emoji,text,key,selected){return `<button class="card ${selected===text?"selected":""}" onclick="choose('${key}',${JSON.stringify(text)})"><span class="emoji">${emoji}</span><strong>${text}</strong>${selected===text?'<span class="check">✓</span>':''}</button>`}
+function welcome(){shell(`<div class="center"><div class="spacer"></div><div class="logoicon">🧭</div><div class="logo">TE<span>guí</span><b>A</b></div><p style="font-size:17px;color:#24303a">Tu guía para resolver tus dudas sobre el Autismo</p><div class="hero">👨‍👩‍👧</div><h1>No tienes que saber por dónde empezar.</h1><p>TEguíA te ayudará a entender el TEA, encontrar recursos y descubrir qué pasos puedes dar según vuestra situación.</p><div class="spacer"></div>${btn("Empezar","S.step=1;render()")}<button class="link">Primera versión de prueba</button></div>`)}
+function single(title,sub,opts,key){shell(`<h2>${title}</h2><p class="center">${sub}</p><div>${opts.map(o=>option(o[0],o[1],key,S[key])).join("")}</div><div class="spacer"></div>${btn("Continuar")}`)}
+function multi(title,sub,opts,key){shell(`<h2>${title}</h2><p class="center">${sub}</p><div class="scroll">${opts.map(o=>{let on=S[key].includes(o);return `<button class="checkrow ${on?"sel":""}" onclick="toggle('${key}',${JSON.stringify(o)})"><span class="box">${on?"✓":""}</span><span>${o}</span></button>`}).join("")}</div><div class="spacer"></div>${btn("Continuar")}`)}
+function render(){
+ if(S.step===0)return welcome();
+ if(S.step===1)return single("¿En qué momento estáis ahora mismo?","No hay una respuesta correcta. Elige la que mejor describa vuestra situación.",[["🔎","Tengo algunas preocupaciones sobre el desarrollo de mi hijo/a"],["🩺","Estamos buscando una valoración"],["🧩","Ya tenemos un diagnóstico de TEA"],["🧭","Ya llevamos tiempo con el diagnóstico y necesitamos orientación"]],"stage");
+ if(S.step===2)return single("¿Qué edad tiene tu hijo/a?","La edad nos ayuda a mostrarte información y recursos más relevantes.",[["👶","0–2 años"],["🧒","3–5 años"],["🧑","6–11 años"],["🧑‍🎓","12–17 años"]],"age");
+ if(S.step===3)return shell(`<h2>¿Dónde vivís?</h2><p class="center">Utilizaremos tu ubicación para ayudarte a encontrar recursos, profesionales y trámites relevantes para vuestra zona.</p><div class="location"><div class="pin">📍</div><b>Tu ubicación es importante</b><p>En esta versión puedes usar una ubicación aproximada o indicar una zona manualmente.</p></div>${btn("📍 Usar mi ubicación actual","S.location='Ubicación actual';S.step=4;render()")}${btn("Introducir ubicación manualmente","S.location='Cataluña';S.step=4;render()")}<div class="hint">🔒 Tu privacidad es importante. Este prototipo no envía tu ubicación a ningún servicio externo.</div><div class="spacer"></div>`);
+ if(S.step===4)return single("¿Tenéis un diagnóstico de TEA?","Esta respuesta cambia el tipo de orientación que te mostraremos.",[["🌱","No, todavía no tenemos diagnóstico"],["🧩","Sí, tenemos un diagnóstico de TEA"]],"diagnosis");
+ if(S.step===5)return multi("¿Qué necesitas ahora mismo?","Puedes elegir varias opciones. Si no sabes por dónde empezar, también puedes decírnoslo.",["🧠 Entender mejor el TEA","🧩 Conocer las intervenciones y terapias","📍 Encontrar profesionales o centros","💶 Conocer ayudas y trámites","🏫 Información sobre educación","❤️ Orientación para el día a día","📋 Organizar los próximos pasos","🧭 No sé por dónde empezar"],"needs");
+ if(S.step===6)return multi("¿Habéis empezado alguna intervención?","Puedes elegir varias opciones.",["Ninguna todavía","Psicología","Logopedia","Terapia ocupacional","Atención temprana","Otra","No estoy seguro/a"],"interventions");
+ if(S.step===7)return single("¿Tu hijo/a está escolarizado/a actualmente?","Esto nos ayudará a preparar mejor la parte educativa.",[["🏫","Sí"],["🏠","No"],["🌱","Todavía no"]],"school");
+ if(S.step===8)return shell(`<h2>¿Quieres que TEguíA te ayude a recordar lo que conviene revisar?</h2><p class="center">Algunas ayudas, terapias, recursos y decisiones educativas pueden necesitar revisarse a medida que tu hijo crece.</p><div class="checkrow ${S.notifications?"sel":""}" onclick="S.notifications=!S.notifications;render()"><span class="box">${S.notifications?"✓":""}</span><span>🔔 Sí, quiero que me avise</span></div><div class="spacer"></div>${btn("Continuar","S.step=9;render()")}`);
+ if(S.step===9)return shell(`<div class="loading center"><div class="compass">🧭</div><h1>Estamos preparando vuestro camino…</h1><p>Hemos tenido en cuenta vuestra situación, edad, ubicación y lo que necesitáis ahora.</p><p class="spin" style="font-size:28px">◌</p><div class="spacer"></div>${btn("Ver mi camino","S.step=10;render()")}</div>`);
+ if(S.step===10)return path();
+ if(S.step===11)return detail(S.detail||"intervenciones");
+}
+function next(){if(S.step<9){S.step++;render()}else{S.step=10;render()}}
+function back(){if(S.step>1){S.step--;render()}else if(S.step===1){S.step=0;render()}}
+function choose(k,v){S[k]=v;render()}
+function toggle(k,v){let i=S[k].indexOf(v);if(i>=0)S[k].splice(i,1);else S[k].push(v);render()}
+function path(){
+ let recs=S.diagnosis.includes("Sí")||S.stage.includes("diagnóstico")?[
+ ["🧩","Revisar las intervenciones","Conoce las diferentes intervenciones y qué aspectos puede trabajar cada profesional.","intervenciones"],
+ ["📍","Encontrar profesionales y centros","Busca recursos cercanos y descubre qué ofrece cada centro.","recursos"],
+ ["💶","Revisar ayudas","Conoce las ayudas y trámites que podrían ser relevantes para vuestra situación.","ayudas"],
+ ["🏫","Recursos educativos","Conoce los recursos que pueden ser importantes durante la escolarización.","educacion"]
+ ]:[
+ ["🧠","Entender qué está pasando","Organiza tus dudas y conoce información general sobre el desarrollo y el TEA.","entender"],
+ ["🩺","Buscar una valoración profesional","Conoce los pasos habituales para plantear tus preocupaciones a un profesional.","valoracion"],
+ ["📍","Encontrar recursos","Descubre recursos y profesionales que pueden orientarte.","recursos"],
+ ["📋","Organizar tus próximos pasos","Guarda las cuestiones que quieras revisar y avanza poco a poco.","organizar"]
+ ];
+ shell(`<div class="path"><div style="font-size:28px">🧭</div><h1>Vuestro camino</h1><p>No tienes que hacerlo todo hoy.<br>Hemos seleccionado algunos pasos que pueden ser útiles para vosotros ahora.</p>${recs.map((r,i)=>`<div class="rec" onclick="S.detail='${r[3]}';S.step=11;render()"><h3>${r[0]} ${i+1}. ${r[1]} <span style="float:right">›</span></h3><p>${r[2]}</p></div>`).join("")}<div class="rec" style="background:#f5f7f8"><h3>⚪ 5. Revisar más adelante</h3><p>Algunas cuestiones pueden ser importantes más adelante. TEguíA te ayudará a volver a ellas cuando sea necesario.</p></div><p class="notice">TEguíA no diagnostica ni sustituye la valoración de profesionales. Su objetivo es ayudarte a orientarte.</p></div><nav class="nav"><b>⌂<br>Mi guía</b><span>⌖<br>Recursos</span><span>€<br>Ayudas</span><span>♙<br>Perfil</span></nav>`);
+}
+function detail(type){
+ let data={
+ intervenciones:["🧩","Revisar las intervenciones","Existen diferentes profesionales e intervenciones que pueden trabajar distintas áreas del desarrollo.","Psicología · Logopedia · Terapia ocupacional · Atención temprana"],
+ recursos:["📍","Encontrar profesionales y centros","En próximas versiones podrás buscar recursos cercanos y comparar qué ofrece cada centro.","Distancia · Tipo de servicio · Edad · Modalidad"],
+ ayudas:["💶","Revisar ayudas","En próximas versiones aquí aparecerán ayudas y trámites contrastados con fuentes oficiales.","Requisitos · Documentación · Plazos · Fuente oficial"],
+ educacion:["🏫","Recursos educativos","Podrás consultar recursos educativos y preparar futuras decisiones de escolarización.","Apoyos · Recursos · Orientación · Centros"],
+ entender:["🧠","Entender qué está pasando","Información general para organizar tus dudas sin convertirlas en un diagnóstico.","TEA · Desarrollo · Señales · Próximos pasos"],
+ valoracion:["🩺","Buscar una valoración profesional","Conoce los pasos habituales para plantear tus preocupaciones a profesionales.","Pediatría · Atención temprana · Valoración"],
+ organizar:["📋","Organizar tus próximos pasos","Guarda las cuestiones que quieras revisar y avanza poco a poco.","Mi camino · Recordatorios · Revisiones"]
+ }[type]||null;
+ shell(`<div class="detail"><div class="icon">${data[0]}</div><h1>${data[1]}</h1><p style="font-size:17px">${data[2]}</p><div class="info"><b>Qué encontrarás</b><p>${data[3]}</p></div><div class="info"><b>¿Por qué te recomendamos esto?</b><p>Esta recomendación se basa en las respuestas que has dado durante el inicio de TEguíA. No determina qué necesita tu hijo/a; su objetivo es ayudarte a conocer opciones y preparar mejor tus conversaciones con profesionales.</p></div><p class="notice">En próximas versiones añadiremos información contrastada, recursos de tu zona y fuentes oficiales.</p><div class="spacer"></div>${btn("← Volver a mi camino","S.step=10;render()")}</div>`);
+}
+render();
+</script>
+</body>
+</html>
