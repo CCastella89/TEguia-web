@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#168f93">
-<title>TEguíA 0.1</title>
+<title>TEguíA 0.2</title>
 <style>
 :root{--teal:#168f93;--teal2:#0f777b;--ink:#17212b;--muted:#66727d;--line:#e5e9ec;--soft:#f5f7f8;--green:#4f9b65}
 *{box-sizing:border-box}body{margin:0;background:#eef1f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
@@ -43,14 +43,19 @@ function render(){
  if(S.step===6)return multi("¿Habéis empezado alguna intervención?","Puedes elegir varias opciones.",["Ninguna todavía","Psicología","Logopedia","Terapia ocupacional","Atención temprana","Otra","No estoy seguro/a"],"interventions");
  if(S.step===7)return single("¿Tu hijo/a está escolarizado/a actualmente?","Esto nos ayudará a preparar mejor la parte educativa.",[["🏫","Sí"],["🏠","No"],["🌱","Todavía no"]],"school");
  if(S.step===8)return shell(`<h2>¿Quieres que TEguíA te ayude a recordar lo que conviene revisar?</h2><p class="center">Algunas ayudas, terapias, recursos y decisiones educativas pueden necesitar revisarse a medida que tu hijo crece.</p><div class="checkrow ${S.notifications?"sel":""}" onclick="S.notifications=!S.notifications;render()"><span class="box">${S.notifications?"✓":""}</span><span>🔔 Sí, quiero que me avise</span></div><div class="spacer"></div>${btn("Continuar","S.step=9;render()")}`);
- if(S.step===9)return shell(`<div class="loading center"><div class="compass">🧭</div><h1>Estamos preparando vuestro camino…</h1><p>Hemos tenido en cuenta vuestra situación, edad, ubicación y lo que necesitáis ahora.</p><p class="spin" style="font-size:28px">◌</p><div class="spacer"></div>${btn("Ver mi camino","S.step=10;render()")}</div>`);
+ if(S.step===9)return shell(`<div class="loading center"><div class="compass">🧭</div><h1>Estamos preparando vuestro camino…</h1><p>Hemos tenido en cuenta vuestra situación, edad, ubicación y lo que necesitáis ahora.</p><p class="spin" style="font-size:28px">◌</p><div class="spacer"></div>${btn("Ver mi camino","S.step=(S.stage===\'Tengo algunas preocupaciones sobre el desarrollo de mi hijo/a\'?12:10);S.concernIndex=0;render()")}</div>`);
  if(S.step===10)return path();
+ if(S.step===12)return concernGuide();
  if(S.step===11)return detail(S.detail||"intervenciones");
 }
 function next(){if(S.step<9){S.step++;render()}else{S.step=10;render()}}
 function back(){if(S.step>1){S.step--;render()}else if(S.step===1){S.step=0;render()}}
 function choose(k,v){S[k]=v;render()}
 function toggle(k,v){let i=S[k].indexOf(v);if(i>=0)S[k].splice(i,1);else S[k].push(v);render()}
+
+const concernScreens=[["❤️","Respira. No tienes que resolverlo todo hoy.","Si algo en el desarrollo de tu hijo o hija te preocupa, es normal tener muchas preguntas. Algunas características pueden aparecer en el TEA, pero ninguna señal aislada confirma un diagnóstico. Hablarlo con un profesional es un buen primer paso."],["👀","Lo que estás observando importa.","Algunas señales que merece la pena comentar son diferencias en la comunicación, la respuesta al nombre, la atención compartida, el juego, las reacciones sensoriales o la adaptación a cambios. Cada niño tiene su propio desarrollo y estas señales no bastan para diagnosticar TEA."],["🔄","¿Ha perdido habilidades que ya tenía?","Si antes utilizaba palabras, respondía a su nombre o mostraba habilidades que ahora han desaparecido, solicita una valoración médica sin esperar. La pérdida de habilidades no significa necesariamente autismo y puede tener distintas causas."],["🧩","¿Significa que tiene autismo?","No necesariamente. TEguíA no diagnostica. El diagnóstico requiere una valoración clínica del desarrollo por profesionales con experiencia. Esta guía te ayuda a organizar las preguntas y los próximos pasos."],["🩺","Prepara la primera consulta","Anota qué has observado, desde cuándo sucede y si has notado cambios. Si tienes vídeos cotidianos que ilustren tus dudas, puedes enseñarlos al profesional. Consulta con pediatría y pregunta por una evaluación del desarrollo y los recursos de atención temprana."],["🧠","Infórmate mientras esperas","Puedes conocer las opciones de apoyo y atención temprana mientras se realiza la valoración. No es necesario esperar a una etiqueta diagnóstica para consultar dificultades del desarrollo. Las intervenciones deben adaptarse a las necesidades individuales y contar con orientación profesional."],["❤️","No tienes que hacerlo todo hoy","Es comprensible sentirse perdido o tener muchas dudas. Pedir orientación y avanzar paso a paso es suficiente para empezar. Ahora te mostraremos vuestro camino con los próximos recursos y cuestiones que conviene revisar."]];
+function concernGuide(){const x=concernScreens[S.concernIndex||0];shell(`<div style="text-align:center;font-size:44px;margin-top:12px">${x[0]}</div><h1 style="text-align:center">${x[1]}</h1><p style="font-size:17px;color:#24303a;line-height:1.65;margin-top:20px">${x[2]}</p><div class="spacer"></div><p class="notice">Paso ${(S.concernIndex||0)+1} de 7 · Información general, no sustituye la valoración profesional.</p>${btn((S.concernIndex||0)===6?"🧭 Continuar con mi camino":"Continuar →","nextConcern()")}<button class="link" onclick="S.concernIndex>0?(S.concernIndex--,render()):(S.step=9,render())">← Volver</button></div>`)}
+function nextConcern(){if((S.concernIndex||0)<6){S.concernIndex++;render()}else{S.step=10;render()}}
 function path(){
  let recs=S.diagnosis.includes("Sí")||S.stage.includes("diagnóstico")?[
  ["🧩","Revisar las intervenciones","Conoce las diferentes intervenciones y qué aspectos puede trabajar cada profesional.","intervenciones"],
